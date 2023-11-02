@@ -131,6 +131,93 @@ Please commit the following to this `README.md`:
    - If this application was destined for a production environment, what would you add or change?
    - What compromises did you have to make as a result of the time constraints of this challenge?
 
+## Instructions
+
+I used a virtual environment to run the project but have included a `requirements.txt` file instead for testing without it.
+
+### Virtual Environment setup
+
+1.  If you don't have `pipenv` installed, you can install it using pip:
+
+   ```bash
+   pip install pipenv
+   ```
+
+2. Install the project's dependencies:
+
+   ```bash
+   pipenv install
+   ```
+
+   - This will create a virtual environment and install the required packages specified in the `Pipfile.lock`.
+
+3. Exit the environment at any time with `exit` and re-activate it with:
+
+   ```
+   pipenv shell
+   ```
+
+### requirements.txt
+
+- Install dependencies with:
+
+  ```
+  pip install -r requirements.txt
+  ```
+
+### Build/Run
+
+1. In the root folder create and make database migrations:
+
+   ```
+   python manage.py makemigrations
+   python manage.py migrate
+   ```
+
+   - A db.sqlite3 database file should be created.
+
+2. Run the project:
+
+   ```
+   python manage.py runserver
+   ```
+
+   - The app should be available on `localhost:8000`.
+
+3. Send curl requests to test the endpoints. On Windows:
+
+   ```bash
+   curl -X POST -F "csv_file=@time-report-42.csv" http://127.0.0.1:8000/upload-csv/
+   curl -X GET http://127.0.0.1:8000/payroll-reports/
+   ```
+
+## Answers
+
+1. Tests were implemented for core functionality. They are located within `test.py`. These can be run with:
+
+   ```bash
+   python manage.py test payroll
+   ```
+
+   - These test could be extended as noted in some comments.
+
+2. Some comments already hint at this but having more error handling like CSV content checking or data validation throughout is the obvious answer.
+
+   - Additionally duplication issues are to be considered. A report with identical data could be entered with a different id.
+   - Some standard API documentation of the endpoints could be added.
+   - Depending on the scale of the expected database, queries could become inefficient and optimization might be needed. A production ready database like Postgres could be used instead, indexing could be added, saved queries into it's own database.
+   - If extensibility of this feature was in mind I might design the implementation slightly differently.
+     - I would have an Employee table that is saved to when reports are uploaded that has all these calculated and transformed values already. 
+     - Then report generation doesn't need to recalculate anything and can only consist of filters and queries based on employees, time spans, job types, paid amounts, etc. Custom queries would likely be an obvious extension.
+   - There are plenty of other production considerations that could be relevant like authentication may be required, or adding to automated testing pipelines, or load/performance/concurrency tests.
+   - Oh, and of course the DEBUG flag should be set to False :)
+
+3. I did what I thought was feature complete for the scope but as noted above, extra care should be taken in validation and duplicates.
+
+   - Further "separation of concerns" can be done by moving logic out where needed.
+     - A validation function instead of it being all under the post function.
+     - Like specified earlier the get request doesn't have to calculate all the json values if they're already saved in a database and optimization is needed.
+
 ## Submission Instructions
 
 1. Clone the repository.
